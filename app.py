@@ -24,7 +24,7 @@ os.makedirs(RESULT_FOLDER, exist_ok=True)
 
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 
-MODEL_PATH = "models/retinaAI_dr_model.keras"
+MODEL_PATH = "models/retina_model_v2.keras"
 
 
 # ============================================================
