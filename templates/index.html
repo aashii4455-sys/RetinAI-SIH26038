@@ -1,0 +1,1811 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>RetinAI | Explainable Diabetic Retinopathy Screening</title>
+
+<style>
+
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+}
+
+:root{
+    --navy:#071a2b;
+    --blue:#0878f9;
+    --cyan:#13b8c8;
+    --green:#159b76;
+    --bg:#f4f8fc;
+    --card:#ffffff;
+    --border:#dce7f0;
+    --text:#172b3a;
+    --muted:#687b8b;
+}
+
+body{
+    font-family:Arial,Helvetica,sans-serif;
+    background:var(--bg);
+    color:var(--text);
+}
+
+/* HEADER */
+
+header{
+    background:linear-gradient(135deg,#061827,#0b3150);
+    color:white;
+    padding:18px 7%;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+
+.brand{
+    display:flex;
+    align-items:center;
+    gap:12px;
+}
+
+.logo{
+    width:44px;
+    height:44px;
+    border-radius:12px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:24px;
+    background:linear-gradient(135deg,#0878f9,#13b8c8);
+}
+
+.brand h1{
+    font-size:23px;
+}
+
+.brand p{
+    font-size:12px;
+    color:#b9d1df;
+    margin-top:3px;
+}
+
+.online{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    font-size:13px;
+}
+
+.dot{
+    width:9px;
+    height:9px;
+    background:#27d47b;
+    border-radius:50%;
+}
+
+/* HERO */
+
+.hero{
+    text-align:center;
+    max-width:900px;
+    margin:42px auto 30px;
+    padding:0 20px;
+}
+
+.badge{
+    display:inline-block;
+    padding:7px 15px;
+    border-radius:30px;
+    background:#e6f2ff;
+    color:#0865c2;
+    font-size:12px;
+    font-weight:bold;
+    margin-bottom:15px;
+}
+
+.hero h2{
+    font-size:42px;
+    color:var(--navy);
+    margin-bottom:12px;
+}
+
+.hero h2 span{
+    color:var(--blue);
+}
+
+.hero p{
+    color:var(--muted);
+    line-height:1.7;
+    font-size:15px;
+}
+
+/* MAIN */
+
+.container{
+    max-width:1180px;
+    margin:auto;
+    padding:0 24px 55px;
+}
+
+.grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:24px;
+}
+
+.card{
+    background:white;
+    border:1px solid var(--border);
+    border-radius:20px;
+    padding:27px;
+    box-shadow:0 12px 35px rgba(10,45,70,.07);
+}
+
+.title{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin-bottom:7px;
+}
+
+.title span{
+    font-size:21px;
+}
+
+.title h3{
+    font-size:20px;
+    color:var(--navy);
+}
+
+.subtitle{
+    color:var(--muted);
+    font-size:13px;
+    margin-bottom:20px;
+}
+
+/* UPLOAD */
+
+.upload{
+    border:2px dashed #b7cede;
+    border-radius:17px;
+    padding:42px 20px;
+    text-align:center;
+    background:#f9fcff;
+    cursor:pointer;
+    transition:.25s;
+}
+
+.upload:hover,
+.upload.drag{
+    border-color:var(--blue);
+    background:#eef7ff;
+}
+
+.upload-icon{
+    font-size:43px;
+    margin-bottom:12px;
+}
+
+.upload h4{
+    font-size:17px;
+    margin-bottom:7px;
+}
+
+.upload p{
+    font-size:13px;
+    color:var(--muted);
+    line-height:1.6;
+}
+
+.upload input{
+    display:none;
+}
+
+.file{
+    margin-top:12px;
+    color:#0878f9;
+    font-size:12px;
+    font-weight:bold;
+}
+
+.preview{
+    display:none;
+    margin-top:18px;
+    text-align:center;
+}
+
+.preview img{
+    max-width:100%;
+    max-height:220px;
+    border-radius:13px;
+    border:1px solid var(--border);
+}
+
+/* BUTTON */
+
+.button{
+    width:100%;
+    border:0;
+    margin-top:18px;
+    padding:15px;
+    border-radius:12px;
+    color:white;
+    background:linear-gradient(135deg,#0878f9,#087fc8);
+    font-size:16px;
+    font-weight:bold;
+    cursor:pointer;
+    box-shadow:0 8px 20px rgba(8,120,249,.22);
+}
+
+.button:hover{
+    transform:translateY(-1px);
+}
+
+.button:disabled{
+    opacity:.65;
+}
+
+.loading{
+    display:none;
+    text-align:center;
+    color:#0878f9;
+    font-size:13px;
+    margin-top:14px;
+}
+
+#error{
+    display:none;
+    margin-top:14px;
+    padding:12px;
+    border-radius:10px;
+    background:#fff0f1;
+    color:#b4232f;
+    font-size:13px;
+}
+
+/* RESULT */
+
+#result{
+    display:none;
+}
+
+.empty{
+    text-align:center;
+    padding:65px 15px;
+    color:#81919e;
+}
+
+.empty-icon{
+    font-size:48px;
+    margin-bottom:12px;
+}
+
+.result-box{
+    padding:18px;
+    background:#f4f9fd;
+    border:1px solid var(--border);
+    border-radius:15px;
+    margin-bottom:15px;
+}
+
+.label{
+    font-size:11px;
+    text-transform:uppercase;
+    letter-spacing:1px;
+    color:var(--muted);
+    margin-bottom:7px;
+}
+
+#prediction{
+    font-size:27px;
+    font-weight:bold;
+    color:var(--navy);
+}
+
+.metrics{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:12px;
+}
+
+.metric{
+    padding:17px;
+    background:#f9fbfd;
+    border:1px solid var(--border);
+    border-radius:13px;
+}
+
+.metric-label{
+    color:var(--muted);
+    font-size:12px;
+    margin-bottom:6px;
+}
+
+.metric-value{
+    color:#0878f9;
+    font-size:23px;
+    font-weight:bold;
+}
+
+.bar{
+    height:7px;
+    background:#e2eaf1;
+    border-radius:20px;
+    overflow:hidden;
+    margin-top:10px;
+}
+
+.fill{
+    width:0%;
+    height:100%;
+    background:linear-gradient(90deg,#0878f9,#13b8c8);
+    transition:1s;
+}
+
+/* SEVERITY */
+
+.severity{
+    margin-top:15px;
+    padding:18px;
+    background:#fbfdff;
+    border:1px solid var(--border);
+    border-radius:14px;
+}
+
+.severity h4{
+    color:var(--navy);
+    font-size:14px;
+    margin-bottom:4px;
+}
+
+.severity p{
+    color:var(--muted);
+    font-size:11px;
+    margin-bottom:17px;
+}
+
+.scale{
+    display:flex;
+    align-items:center;
+}
+
+.step{
+    text-align:center;
+    opacity:.35;
+    min-width:55px;
+    transition:.3s;
+}
+
+.circle{
+    width:34px;
+    height:34px;
+    border-radius:50%;
+    background:#e5edf4;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    margin:auto;
+    font-weight:bold;
+    font-size:13px;
+}
+
+.name{
+    font-size:9px;
+    margin-top:6px;
+    color:#627484;
+}
+
+.connector{
+    height:2px;
+    flex:1;
+    background:#dbe5ed;
+}
+
+.step.active{
+    opacity:1;
+}
+
+.step.active .circle{
+    background:linear-gradient(135deg,#0878f9,#13b8c8);
+    color:white;
+    box-shadow:0 4px 13px rgba(8,120,249,.3);
+}
+
+.step.active .name{
+    color:#0878f9;
+    font-weight:bold;
+}
+
+.current{
+    text-align:center;
+    margin-top:13px;
+    padding:8px;
+    border-radius:8px;
+    background:#edf6ff;
+    color:#0865c2;
+    font-size:12px;
+    font-weight:bold;
+}
+
+/* INFORMATION */
+
+.info{
+    padding:16px;
+    border-radius:13px;
+    margin-top:13px;
+}
+
+.info h4{
+    font-size:14px;
+    margin-bottom:7px;
+}
+
+.info p{
+    color:#526675;
+    font-size:13px;
+    line-height:1.6;
+}
+
+.explain{
+    background:#eef7ff;
+    border:1px solid #cce3fa;
+}
+
+.recommend{
+    background:#effaf6;
+    border:1px solid #ccecdf;
+}
+
+.warning{
+    background:#fff8e8;
+    border:1px solid #f0dda9;
+}
+
+/* GRAD-CAM */
+
+.explainability{
+    margin-top:15px;
+    padding:18px;
+    background:#f8fbff;
+    border:1px solid #cfe0ee;
+    border-radius:15px;
+}
+
+.explainability-header{
+    display:flex;
+    align-items:center;
+    gap:9px;
+    margin-bottom:7px;
+}
+
+.explainability-header h4{
+    color:var(--navy);
+    font-size:15px;
+}
+
+.explainability-description{
+    color:var(--muted);
+    font-size:12px;
+    line-height:1.6;
+    margin-bottom:14px;
+}
+
+.heatmap-container{
+    position:relative;
+    width:100%;
+    overflow:hidden;
+    border-radius:13px;
+    background:#071a2b;
+}
+
+.heatmap-container img{
+    width:100%;
+    display:block;
+}
+
+.heatmap-caption{
+    margin-top:10px;
+    padding:10px;
+    border-radius:9px;
+    background:#edf6ff;
+    color:#36576e;
+    font-size:11px;
+    line-height:1.5;
+}
+
+.heatmap-legend{
+    display:flex;
+    justify-content:space-between;
+    margin-top:8px;
+    font-size:10px;
+    color:#6d7f8d;
+}
+
+/* WORKFLOW */
+
+.workflow{
+    margin-top:25px;
+    padding:25px;
+    background:white;
+    border:1px solid var(--border);
+    border-radius:18px;
+    box-shadow:0 10px 30px rgba(10,45,70,.05);
+}
+
+.workflow-title{
+    text-align:center;
+    margin-bottom:22px;
+}
+
+.workflow-title h3{
+    color:var(--navy);
+    margin-bottom:6px;
+}
+
+.workflow-title p{
+    color:var(--muted);
+    font-size:13px;
+}
+
+.workflow-grid{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:12px;
+}
+
+.workflow-step{
+    text-align:center;
+    padding:17px 10px;
+    background:#f7fafc;
+    border-radius:12px;
+}
+
+.workflow-step .icon{
+    font-size:25px;
+    margin-bottom:8px;
+}
+
+.workflow-step strong{
+    display:block;
+    font-size:13px;
+    color:var(--navy);
+    margin-bottom:5px;
+}
+
+.workflow-step span{
+    font-size:11px;
+    color:var(--muted);
+    line-height:1.4;
+}
+
+/* IMAGE */
+
+.result-image{
+    width:100%;
+    margin-top:15px;
+    border-radius:14px;
+    border:1px solid var(--border);
+}
+
+/* DISCLAIMER */
+
+.disclaimer{
+    text-align:center;
+    color:#778895;
+    font-size:11px;
+    line-height:1.6;
+    margin-top:25px;
+}
+
+/* FOOTER */
+
+footer{
+    background:#071a2b;
+    color:#9db1c0;
+    text-align:center;
+    padding:24px;
+    font-size:12px;
+}
+
+footer strong{
+    color:white;
+}
+
+/* MOBILE */
+
+@media(max-width:800px){
+
+    .grid{
+        grid-template-columns:1fr;
+    }
+
+    .hero h2{
+        font-size:31px;
+    }
+
+    .online{
+        display:none;
+    }
+
+    .workflow-grid{
+        grid-template-columns:1fr 1fr;
+    }
+
+}
+
+</style>
+
+</head>
+
+
+<body>
+
+
+<!-- ===================================================== -->
+<!-- HEADER -->
+<!-- ===================================================== -->
+
+<header>
+
+    <div class="brand">
+
+        <div class="logo">
+            👁️
+        </div>
+
+        <div>
+
+            <h1>
+                RetinAI
+            </h1>
+
+            <p>
+                Explainable AI • Retinal Screening
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <div class="online">
+
+        <span class="dot"></span>
+
+        AI Screening System Online
+
+    </div>
+
+</header>
+
+
+<!-- ===================================================== -->
+<!-- HERO -->
+<!-- ===================================================== -->
+
+<section class="hero">
+
+    <div class="badge">
+        SMART INDIA HACKATHON • HEALTHCARE AI
+    </div>
+
+
+    <h2>
+
+        Intelligent
+        <span>
+            Diabetic Retinopathy
+        </span>
+        Screening
+
+    </h2>
+
+
+    <p>
+
+        An AI-assisted screening prototype that analyzes
+        retinal fundus images, estimates diabetic retinopathy
+        severity, and provides an interpretable visual
+        explanation of the model prediction.
+
+    </p>
+
+</section>
+
+
+<main class="container">
+
+
+<div class="grid">
+
+
+<!-- ===================================================== -->
+<!-- UPLOAD -->
+<!-- ===================================================== -->
+
+<section class="card">
+
+    <div class="title">
+
+        <span>
+            📤
+        </span>
+
+        <h3>
+            Retinal Image
+        </h3>
+
+    </div>
+
+
+    <p class="subtitle">
+
+        Upload a retinal fundus image for AI-assisted screening.
+
+    </p>
+
+
+    <div
+        class="upload"
+        id="uploadArea"
+        onclick="document.getElementById('imageInput').click()"
+    >
+
+        <div class="upload-icon">
+            🩺
+        </div>
+
+
+        <h4>
+            Upload retinal image
+        </h4>
+
+
+        <p>
+            Click to browse or drag & drop
+        </p>
+
+
+        <p>
+            JPG • JPEG • PNG
+        </p>
+
+
+        <input
+            type="file"
+            id="imageInput"
+            accept=".jpg,.jpeg,.png"
+            onchange="handleFile(this.files[0])"
+        >
+
+
+        <div
+            class="file"
+            id="fileName"
+        ></div>
+
+    </div>
+
+
+    <div
+        class="preview"
+        id="preview"
+    >
+
+        <img
+            id="previewImage"
+            alt="Retinal image preview"
+        >
+
+    </div>
+
+
+    <button
+        class="button"
+        id="analyzeBtn"
+        onclick="analyzeImage()"
+    >
+
+        🔍 Analyze Retina
+
+    </button>
+
+
+    <div
+        class="loading"
+        id="loading"
+    >
+
+        ⏳ AI model is analyzing the retinal image...
+
+    </div>
+
+
+    <div id="error"></div>
+
+</section>
+
+
+<!-- ===================================================== -->
+<!-- RESULTS -->
+<!-- ===================================================== -->
+
+<section class="card">
+
+    <div class="title">
+
+        <span>
+            🧠
+        </span>
+
+        <h3>
+            AI Screening Result
+        </h3>
+
+    </div>
+
+
+    <p class="subtitle">
+
+        Model-generated screening assessment
+
+    </p>
+
+
+    <div
+        class="empty"
+        id="emptyResult"
+    >
+
+        <div class="empty-icon">
+            👁️
+        </div>
+
+
+        <h4
+            style="color:#526675;margin-bottom:8px;"
+        >
+
+            Awaiting retinal image
+
+        </h4>
+
+
+        <p
+            style="font-size:13px;line-height:1.6;"
+        >
+
+            Upload an image and click
+            <strong>
+                Analyze Retina
+            </strong>
+            to generate the screening result.
+
+        </p>
+
+    </div>
+
+
+    <div id="result">
+
+
+        <!-- PREDICTION -->
+
+        <div class="result-box">
+
+            <div class="label">
+                Predicted classification
+            </div>
+
+
+            <div id="prediction">
+                —
+            </div>
+
+        </div>
+
+
+        <!-- METRICS -->
+
+        <div class="metrics">
+
+
+            <div class="metric">
+
+                <div class="metric-label">
+                    DR Grade
+                </div>
+
+
+                <div
+                    class="metric-value"
+                    id="grade"
+                >
+                    —
+                </div>
+
+            </div>
+
+
+            <div class="metric">
+
+                <div class="metric-label">
+                    Model Confidence
+                </div>
+
+
+                <div
+                    class="metric-value"
+                    id="confidence"
+                >
+                    —
+                </div>
+
+
+                <div class="bar">
+
+                    <div
+                        class="fill"
+                        id="confidenceFill"
+                    ></div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- ================================================= -->
+        <!-- SEVERITY -->
+        <!-- ================================================= -->
+
+        <div class="severity">
+
+            <h4>
+                📊 Diabetic Retinopathy Severity
+            </h4>
+
+
+            <p>
+                AI classification across the five-grade screening scale
+            </p>
+
+
+            <div class="scale">
+
+
+                <div
+                    class="step"
+                    id="grade0"
+                >
+
+                    <div class="circle">
+                        0
+                    </div>
+
+                    <div class="name">
+                        No DR
+                    </div>
+
+                </div>
+
+
+                <div class="connector"></div>
+
+
+                <div
+                    class="step"
+                    id="grade1"
+                >
+
+                    <div class="circle">
+                        1
+                    </div>
+
+                    <div class="name">
+                        Mild
+                    </div>
+
+                </div>
+
+
+                <div class="connector"></div>
+
+
+                <div
+                    class="step"
+                    id="grade2"
+                >
+
+                    <div class="circle">
+                        2
+                    </div>
+
+                    <div class="name">
+                        Moderate
+                    </div>
+
+                </div>
+
+
+                <div class="connector"></div>
+
+
+                <div
+                    class="step"
+                    id="grade3"
+                >
+
+                    <div class="circle">
+                        3
+                    </div>
+
+                    <div class="name">
+                        Severe
+                    </div>
+
+                </div>
+
+
+                <div class="connector"></div>
+
+
+                <div
+                    class="step"
+                    id="grade4"
+                >
+
+                    <div class="circle">
+                        4
+                    </div>
+
+                    <div class="name">
+                        Proliferative
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div
+                class="current"
+                id="severitySelected"
+            >
+
+                Current model classification: —
+
+            </div>
+
+        </div>
+
+
+        <!-- ================================================= -->
+        <!-- TEXT EXPLANATION -->
+        <!-- ================================================= -->
+
+        <div class="info explain">
+
+            <h4>
+                🧠 AI Explanation
+            </h4>
+
+
+            <p id="message">
+                —
+            </p>
+
+        </div>
+
+
+        <!-- ================================================= -->
+        <!-- GRAD-CAM -->
+        <!-- ================================================= -->
+
+        <div class="explainability">
+
+            <div class="explainability-header">
+
+                <span>
+                    🔥
+                </span>
+
+                <h4>
+                    Explainable AI — Grad-CAM
+                </h4>
+
+            </div>
+
+
+            <p class="explainability-description">
+
+                The heatmap highlights image regions that contributed
+                most strongly to the model's predicted class.
+                Brighter regions indicate stronger model attention.
+
+            </p>
+
+
+            <div class="heatmap-container">
+
+                <img
+                    id="heatmapImage"
+                    src=""
+                    alt="Grad-CAM explanation heatmap"
+                >
+
+            </div>
+
+
+            <div class="heatmap-legend">
+
+                <span>
+                    Lower model activation
+                </span>
+
+                <span>
+                    Higher model activation
+                </span>
+
+            </div>
+
+
+            <div class="heatmap-caption">
+
+                ⚠️ Grad-CAM is an AI interpretability technique.
+                Highlighted regions indicate model activation and
+                should not be interpreted as clinically confirmed
+                lesions.
+
+            </div>
+
+        </div>
+
+
+        <!-- ================================================= -->
+        <!-- RECOMMENDATION -->
+        <!-- ================================================= -->
+
+        <div class="info recommend">
+
+            <h4>
+                🩺 Recommended Follow-up
+            </h4>
+
+
+            <p id="recommendation">
+                —
+            </p>
+
+        </div>
+
+
+        <!-- ================================================= -->
+        <!-- CLINICAL NOTICE -->
+        <!-- ================================================= -->
+
+        <div class="info warning">
+
+            <h4>
+                ⚠️ Clinical Notice
+            </h4>
+
+
+            <p id="clinicalNote">
+                —
+            </p>
+
+        </div>
+
+
+        <!-- ORIGINAL RESULT IMAGE -->
+
+        <img
+            id="resultImage"
+            class="result-image"
+            alt="Analyzed retinal image"
+        >
+
+    </div>
+
+</section>
+
+</div>
+
+
+<!-- ===================================================== -->
+<!-- WORKFLOW -->
+<!-- ===================================================== -->
+
+<section class="workflow">
+
+    <div class="workflow-title">
+
+        <h3>
+            🏥 Rural Screening Workflow
+        </h3>
+
+
+        <p>
+            A simple digital pathway for preliminary screening
+            and referral support
+        </p>
+
+    </div>
+
+
+    <div class="workflow-grid">
+
+
+        <div class="workflow-step">
+
+            <div class="icon">
+                📷
+            </div>
+
+
+            <strong>
+                1. Capture
+            </strong>
+
+
+            <span>
+                Obtain a retinal fundus image using an available
+                imaging device.
+            </span>
+
+        </div>
+
+
+        <div class="workflow-step">
+
+            <div class="icon">
+                🤖
+            </div>
+
+
+            <strong>
+                2. AI Screen
+            </strong>
+
+
+            <span>
+                The model classifies the image across five
+                DR severity grades.
+            </span>
+
+        </div>
+
+
+        <div class="workflow-step">
+
+            <div class="icon">
+                🧠
+            </div>
+
+
+            <strong>
+                3. Explain
+            </strong>
+
+
+            <span>
+                Present the predicted grade, confidence and
+                Grad-CAM visual explanation.
+            </span>
+
+        </div>
+
+
+        <div class="workflow-step">
+
+            <div class="icon">
+                🩺
+            </div>
+
+
+            <strong>
+                4. Refer
+            </strong>
+
+
+            <span>
+                Support appropriate follow-up with a qualified
+                eye-care professional.
+            </span>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<div class="disclaimer">
+
+    RetinAI is an AI-assisted screening prototype.
+    Results are not a medical diagnosis and should not replace
+    examination by a qualified eye-care professional.
+
+</div>
+
+
+</main>
+
+
+<!-- ===================================================== -->
+<!-- FOOTER -->
+<!-- ===================================================== -->
+
+<footer>
+
+    <strong>
+        RetinAI
+    </strong>
+
+    &nbsp;•&nbsp;
+
+    Explainable AI for Diabetic Retinopathy Screening
+
+    <br><br>
+
+    Prototype for Smart India Hackathon
+
+</footer>
+
+
+<!-- ===================================================== -->
+<!-- JAVASCRIPT -->
+<!-- ===================================================== -->
+
+<script>
+
+let selectedFile = null;
+
+
+/* ========================================================
+   FILE HANDLING
+   ======================================================== */
+
+function handleFile(file){
+
+    if(!file){
+
+        return;
+
+    }
+
+
+    selectedFile = file;
+
+
+    document.getElementById(
+        "fileName"
+    ).innerText =
+        "Selected: " + file.name;
+
+
+    const reader =
+        new FileReader();
+
+
+    reader.onload = function(e){
+
+        document.getElementById(
+            "previewImage"
+        ).src =
+            e.target.result;
+
+
+        document.getElementById(
+            "preview"
+        ).style.display =
+            "block";
+
+    };
+
+
+    reader.readAsDataURL(file);
+
+}
+
+
+/* ========================================================
+   DRAG AND DROP
+   ======================================================== */
+
+const uploadArea =
+    document.getElementById(
+        "uploadArea"
+    );
+
+
+uploadArea.addEventListener(
+    "dragover",
+    function(e){
+
+        e.preventDefault();
+
+        uploadArea.classList.add(
+            "drag"
+        );
+
+    }
+);
+
+
+uploadArea.addEventListener(
+    "dragleave",
+    function(){
+
+        uploadArea.classList.remove(
+            "drag"
+        );
+
+    }
+);
+
+
+uploadArea.addEventListener(
+    "drop",
+    function(e){
+
+        e.preventDefault();
+
+
+        uploadArea.classList.remove(
+            "drag"
+        );
+
+
+        const file =
+            e.dataTransfer.files[0];
+
+
+        if(file){
+
+            handleFile(file);
+
+        }
+
+    }
+);
+
+
+/* ========================================================
+   ANALYZE IMAGE
+   ======================================================== */
+
+async function analyzeImage(){
+
+    const input =
+        document.getElementById(
+            "imageInput"
+        );
+
+
+    const file =
+        selectedFile ||
+        input.files[0];
+
+
+    if(!file){
+
+        showError(
+            "Please upload a retinal image first."
+        );
+
+        return;
+
+    }
+
+
+    const formData =
+        new FormData();
+
+
+    formData.append(
+        "image",
+        file
+    );
+
+
+    const button =
+        document.getElementById(
+            "analyzeBtn"
+        );
+
+
+    const loading =
+        document.getElementById(
+            "loading"
+        );
+
+
+    button.disabled = true;
+
+
+    button.innerText =
+        "⏳ Analyzing...";
+
+
+    loading.style.display =
+        "block";
+
+
+    document.getElementById(
+        "error"
+    ).style.display =
+        "none";
+
+
+    try{
+
+        const response =
+            await fetch(
+                "/predict",
+                {
+                    method:"POST",
+                    body:formData
+                }
+            );
+
+
+        const data =
+            await response.json();
+
+
+        if(!response.ok){
+
+            throw new Error(
+                data.error ||
+                "Analysis failed."
+            );
+
+        }
+
+
+        /* ================================================
+           SHOW RESULT
+           ================================================ */
+
+        document.getElementById(
+            "emptyResult"
+        ).style.display =
+            "none";
+
+
+        document.getElementById(
+            "result"
+        ).style.display =
+            "block";
+
+
+        /* PREDICTION */
+
+        document.getElementById(
+            "prediction"
+        ).innerText =
+            data.prediction;
+
+
+        /* GRADE */
+
+        document.getElementById(
+            "grade"
+        ).innerText =
+            "Grade " +
+            data.grade;
+
+
+        /* CONFIDENCE */
+
+        document.getElementById(
+            "confidence"
+        ).innerText =
+            data.confidence;
+
+
+        /* TEXT EXPLANATION */
+
+        document.getElementById(
+            "message"
+        ).innerText =
+            data.explanation;
+
+
+        /* RECOMMENDATION */
+
+        document.getElementById(
+            "recommendation"
+        ).innerText =
+            data.recommendation;
+
+
+        /* CLINICAL NOTE */
+
+        document.getElementById(
+            "clinicalNote"
+        ).innerText =
+            data.clinical_note;
+
+
+        /* ================================================
+           CONFIDENCE BAR
+           ================================================ */
+
+        const confidence =
+            parseFloat(
+                data.confidence
+            );
+
+
+        document.getElementById(
+            "confidenceFill"
+        ).style.width =
+            Math.min(
+                confidence,
+                100
+            ) + "%";
+
+
+        /* ================================================
+           SEVERITY SCALE
+           ================================================ */
+
+        for(
+            let i = 0;
+            i <= 4;
+            i++
+        ){
+
+            document.getElementById(
+                "grade" + i
+            ).classList.remove(
+                "active"
+            );
+
+        }
+
+
+        const active =
+            document.getElementById(
+                "grade" + data.grade
+            );
+
+
+        if(active){
+
+            active.classList.add(
+                "active"
+            );
+
+        }
+
+
+        document.getElementById(
+            "severitySelected"
+        ).innerText =
+            "Current model classification: " +
+            data.prediction;
+
+
+        /* ================================================
+           ORIGINAL IMAGE
+           ================================================ */
+
+        if(data.image){
+
+            const image =
+                document.getElementById(
+                    "resultImage"
+                );
+
+
+            image.src =
+                data.image;
+
+        }
+
+
+        /* ================================================
+           GRAD-CAM HEATMAP
+           ================================================ */
+
+        const heatmap =
+            document.getElementById(
+                "heatmapImage"
+            );
+
+
+        if(data.heatmap){
+
+            heatmap.src =
+                data.heatmap +
+                "?t=" +
+                new Date().getTime();
+
+
+            heatmap.style.display =
+                "block";
+
+        }
+
+        else{
+
+            heatmap.style.display =
+                "none";
+
+        }
+
+
+        /* ================================================
+           SCROLL TO RESULT
+           ================================================ */
+
+        document.getElementById(
+            "result"
+        ).scrollIntoView({
+            behavior:"smooth",
+            block:"start"
+        });
+
+
+    }
+
+    catch(error){
+
+        showError(
+            error.message
+        );
+
+    }
+
+    finally{
+
+        button.disabled = false;
+
+
+        button.innerText =
+            "🔍 Analyze Retina";
+
+
+        loading.style.display =
+            "none";
+
+    }
+
+}
+
+
+/* ========================================================
+   ERROR
+   ======================================================== */
+
+function showError(message){
+
+    const error =
+        document.getElementById(
+            "error"
+        );
+
+
+    error.innerText =
+        "⚠️ " + message;
+
+
+    error.style.display =
+        "block";
+
+}
+
+</script>
+
+
+</body>
+
+</html>
